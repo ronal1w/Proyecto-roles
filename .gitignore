@@ -1,0 +1,14 @@
+# Ignorar directorio de vendor de Composer
+/vendor/
+
+# Ignorar archivos de configuración generados por Composer
+/composer.lock
+/composer.json
+
+# Ignorar archivos de caché de Composer
+/.composer/
+
+# Ignorar archivos de caché de PHP
+/.phpunit.result.cache
+/.phpstorm.meta.php
+/.idea/
