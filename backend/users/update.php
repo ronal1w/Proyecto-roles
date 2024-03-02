@@ -1,4 +1,6 @@
 <?php
+header('Content-Type: application/json; charset=utf-8');
+
 
 // Obtiene el contenido JSON enviado en la solicitud
 $json = file_get_contents('php://input');

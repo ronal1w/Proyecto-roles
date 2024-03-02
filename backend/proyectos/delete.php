@@ -1,4 +1,5 @@
 <?php
+header('Content-Type: application/json; charset=utf-8');
 
 // Crea una conexión a la base de datos
 require_once '../../config/database.php';
