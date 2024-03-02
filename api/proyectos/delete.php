@@ -19,6 +19,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'DELETE' || !isset($data['id'])) {
 // Obtiene el ID del proyecto
 $id = $data['id'];
 
+// Verifica si el proyecto existe
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM proyectos WHERE id = ?");
+$stmt->execute([$id]);
+$count = $stmt->fetchColumn();
+
+if ($count === 0) {
+    // El proyecto no existe, devuelve un mensaje de error
+    http_response_code(404);
+    echo json_encode(['error' => 'El proyecto con el ID especificado no existe']);
+    exit();
+}
+
 // Elimina el proyecto de la base de datos
 try {
     $stmt = $pdo->prepare("DELETE FROM proyectos WHERE id = ?");
@@ -34,3 +46,4 @@ try {
 }
 
 ?>
+
