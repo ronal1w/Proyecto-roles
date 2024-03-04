@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <title>Usuarios</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Usuarios</h1>
+
+        <!-- Botón para abrir el modal de creación y edición de usuarios -->
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalCrearEditarUsuario">
+            Crear/Editar Usuario
+        </button>
+
+        <!-- Tabla de usuarios -->
+        <table id="tablaUsuarios" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Rol</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Aquí se llenará la tabla con los usuarios -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal de creación y edición de usuarios -->
+    <div class="modal fade" id="modalCrearEditarUsuario" tabindex="-1" aria-labelledby="modalCrearEditarUsuarioLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalCrearEditarUsuarioLabel">Crear/Editar Usuario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formCrearEditarUsuario">
+                        <div class="mb-3">
+                            <label for="emailUsuario" class="form-label">Email:</label>
+                            <input type="email" class="form-control" id="emailUsuario" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="nombreUsuario" class="form-label">Nombre:</label>
+                            <input type="text" class="form-control" id="nombreUsuario" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="apellidoUsuario" class="form-label">Apellido:</label>
+                            <input type="text" class="form-control" id="apellidoUsuario" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="rolUsuario" class="form-label">Rol:</label>
+                            <select class="form-select" id="rolUsuario" required></select>
+                        </div>                        
+                        <div class="mb-3">
+                            <label for="passwordUsuario" class="form-label">Contraseña:</label>
+                            <input type="password" class="form-control" id="passwordUsuario" required>
+                        </div>
+                        <input type="hidden" id="idUsuario">
+                        <button type="button" class="btn btn-primary" id="guardarUsuario">Guardar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    
+    <!-- jQuery, Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Función para cargar los usuarios en la tabla
+            function cargarUsuarios() {
+                axios.get('http://localhost/proyecto-roles/backend/users/read.php')
+                    .then(response => {
+                        const usuarios = response.data;
+
+                        // Limpiar tabla antes de agregar datos
+                        $('#tablaUsuarios tbody').empty();
+
+                        // Llenar tabla con datos de usuarios
+                        usuarios.forEach(usuario => {
+                            $('#tablaUsuarios tbody').append(`
+                                <tr>
+                                    <td>${usuario.id}</td>
+                                    <td>${usuario.email}</td>
+                                    <td>${usuario.first_name}</td>
+                                    <td>${usuario.last_name}</td>
+                                    <td>${usuario.name}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-primary btn-sm editar-btn" data-bs-toggle="modal" data-bs-target="#modalCrearEditarUsuario" data-id="${usuario.id}" data-email="${usuario.email}" data-nombre="${usuario.first_name}" data-apellido="${usuario.last_name}" data-rol="${usuario.role_id}">Editar</button>
+                                        <button type="button" class="btn btn-danger btn-sm eliminar-btn" data-id="${usuario.id}">Eliminar</button>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error al obtener la lista de usuarios:', error);
+                    });
+            }
+
+            cargarUsuarios();
+
+// Función para limpiar el formulario
+function limpiarFormulario() {
+    $('#idUsuario').val('');
+    $('#emailUsuario').val('');
+    $('#nombreUsuario').val('');
+    $('#apellidoUsuario').val('');
+    $('#rolUsuario').val('');
+    $('#passwordUsuario').val('');
+}
+
+            // Evento para limpiar el formulario al abrir el modal de creación o edición de usuario
+            $('#modalCrearEditarUsuario').on('show.bs.modal', function(event) {
+                limpiarFormulario();
+            });
+
+          // Función para guardar un nuevo usuario
+function guardarUsuario(email, nombre, apellido, rol, contraseña) {
+    console.log('Guardando usuario:', email, nombre, apellido, rol, contraseña); // Imprimir los datos antes de guardar
+    axios.post('http://localhost/proyecto-roles/backend/users/create.php', { email, first_name: nombre, last_name: apellido, role_id: rol, password: contraseña })
+        .then(() => {
+            $('#modalCrearEditarUsuario').modal('hide');
+            cargarUsuarios(); // Recargar la tabla para mostrar los cambios
+        })
+        .catch(error => {
+            console.error('Error al guardar el usuario:', error);
+        });
+}
+
+// Función para editar un usuario existente
+function editarUsuario(id, email, nombre, apellido, rol, contraseña) {
+    console.log('Editando usuario:', id, email, nombre, apellido, rol, contraseña); // Imprimir los datos antes de editar
+    axios.put(`http://localhost/proyecto-roles/backend/users/update.php?id=${id}`, { id, email, first_name: nombre, last_name: apellido, role_id: rol, password: contraseña })
+        .then(() => {
+            $('#modalCrearEditarUsuario').modal('hide');
+            cargarUsuarios(); // Recargar la tabla para mostrar los cambios
+        })
+        .catch(error => {
+            console.error('Error al editar el usuario:', error);
+        });
+}
+
+
+            // Evento para enviar el formulario de creación o edición de usuario
+            $('#guardarUsuario').on('click', function(event) {
+                event.preventDefault();
+                const id = $('#idUsuario').val();
+                const email = $('#emailUsuario').val();
+                const nombre = $('#nombreUsuario').val();
+                const apellido = $('#apellidoUsuario').val();
+                const rol = $('#rolUsuario').val();
+                const contraseña = $('#passwordUsuario').val();
+                if (id) {
+                    editarUsuario(id, email, nombre, apellido, rol, contraseña); // Si hay un ID, editar el usuario existente
+                } else {
+                    guardarUsuario(email, nombre, apellido, rol, contraseña); // Si no hay un ID, guardar un nuevo usuario
+                }
+            });
+
+        // Evento para llenar el formulario con los datos del usuario al editar
+$('#tablaUsuarios').on('click', '.editar-btn', function() {
+    const id = $(this).data('id');
+    const email = $(this).data('email');
+    const nombre = $(this).data('nombre');
+    const apellido = $(this).data('apellido');
+    const rol = $(this).data('rol');
+    const contraseña = $(this).data('contraseña'); // Agrega esta línea para obtener la contraseña
+    $('#idUsuario').val(id);
+    $('#emailUsuario').val(email);
+    $('#nombreUsuario').val(nombre);
+    $('#apellidoUsuario').val(apellido);
+    $('#rolUsuario').val(rol);
+    $('#passwordUsuario').val(contraseña); // Agrega esta línea para establecer la contraseña en el formulario
+});
+
+axios.get('http://localhost/proyecto-roles/backend/roles/read.php')
+    .then(response => {
+        const roles = response.data;
+        const select = document.getElementById('rolUsuario');
+
+        roles.forEach(rol => {
+            const option = document.createElement('option');
+            option.value = rol.id;
+            option.textContent = rol.name;
+            select.appendChild(option);
+        });
+    })
+    .catch(error => {
+        console.error('Error al obtener los roles:', error);
+    });
+
+
+            // Evento para eliminar un usuario
+            $('#tablaUsuarios').on('click', '.eliminar-btn', function() {
+                const id = $(this).data('id');
+                if (confirm('¿Estás seguro de eliminar este usuario?')) {
+                    axios.delete('http://localhost/proyecto-roles/backend/users/delete.php', { data: { id } })
+                        .then(() => {
+                            console.log('Usuario eliminado correctamente');
+                            cargarUsuarios();
+                        })
+                        .catch(error => {
+                            console.error('Error al eliminar el usuario:', error);
+                        });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

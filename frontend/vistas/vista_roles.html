@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <title>Roles</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Roles</h1>
+
+        <!-- Botón para abrir el modal de creación y edición de roles -->
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalCrearEditarRol">
+            Crear/Editar Rol
+        </button>
+
+        <!-- Tabla de roles -->
+        <table id="tablaRoles" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Aquí se llenará la tabla con los roles -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal de creación y edición de roles -->
+    <div class="modal fade" id="modalCrearEditarRol" tabindex="-1" aria-labelledby="modalCrearEditarRolLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalCrearEditarRolLabel">Crear/Editar Rol</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formCrearEditarRol">
+                        <div class="mb-3">
+                            <label for="nombreRol" class="form-label">Nombre del Rol:</label>
+                            <input type="text" class="form-control" id="nombreRol" required>
+                        </div>
+                        <input type="hidden" id="idRol">
+                        <button type="button" class="btn btn-primary" id="guardarRol">Guardar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- jQuery, Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            function cargarRoles() {
+                axios.get('http://localhost/proyecto-roles/backend/roles/read.php')
+                    .then(response => {
+                        const roles = response.data;
+
+                        // Limpiar tabla antes de agregar datos
+                        $('#tablaRoles tbody').empty();
+
+                        // Llenar tabla con datos de roles
+                        roles.forEach(role => {
+                            $('#tablaRoles tbody').append(`
+                                <tr>
+                                    <td>${role.id}</td>
+                                    <td>${role.name}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-primary btn-sm editar-btn" data-bs-toggle="modal" data-bs-target="#modalCrearEditarRol" data-id="${role.id}" data-name="${role.name}">Editar</button>
+                                        <button type="button" class="btn btn-danger btn-sm eliminar-btn" data-id="${role.id}">Eliminar</button>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error al obtener la lista de roles:', error);
+                    });
+            }
+
+            cargarRoles();
+
+            // Función para limpiar el formulario
+function limpiarFormulario() {
+    $('#idRol').val('');
+    $('#nombreRol').val('');
+}
+
+// Evento para limpiar el formulario al abrir el modal de creación o edición de rol
+$('#modalCrearEditarRol').on('show.bs.modal', function(event) {
+    limpiarFormulario();
+});
+
+
+            // Función para guardar un nuevo rol
+            function guardarRol(name) {
+                axios.post('http://localhost/proyecto-roles/backend/roles/create.php', { name })
+                    .then(() => {
+                        $('#modalCrearEditarRol').modal('hide');
+                        cargarRoles(); // Recargar la tabla para mostrar los cambios
+                    })
+                    .catch(error => {
+                        console.error('Error al guardar el rol:', error);
+                    });
+            }
+
+            // Función para editar un rol existente
+            function editarRol(id, name) {
+                axios.put(`http://localhost/proyecto-roles/backend/roles/update.php?id=${id}`, { id, name })
+                    .then(() => {
+                        $('#modalCrearEditarRol').modal('hide');
+                        cargarRoles(); // Recargar la tabla para mostrar los cambios
+                    })
+                    .catch(error => {
+                        console.error('Error al editar el rol:', error);
+                    });
+            }
+
+            // Evento para enviar el formulario de creación o edición de rol
+            $('#guardarRol').on('click', function(event) {
+                event.preventDefault();
+                const id = $('#idRol').val();
+                const name = $('#nombreRol').val();
+                if (id) {
+                    editarRol(id, name); // Si hay un ID, editar el rol existente
+                } else {
+                    guardarRol(name); // Si no hay un ID, guardar un nuevo rol
+                }
+            });
+
+            $('#tablaRoles').on('click', '.editar-btn', function() {
+                const id = $(this).data('id'); // Obtener el ID del rol del botón de editar
+                const name = $(this).data('name');
+                $('#idRol').val(id);
+                $('#nombreRol').val(name);
+            });
+
+            $('#tablaRoles').on('click', '.eliminar-btn', function() {
+    const id = $(this).data('id');
+    console.log('ID del rol a eliminar:', id); // Verificar que se esté obteniendo el ID correctamente
+    if (confirm('¿Estás seguro de eliminar este rol?')) {
+        axios.delete('http://localhost/proyecto-roles/backend/roles/delete.php', { data: { id } })
+            .then(() => {
+                console.log('Rol eliminado correctamente');
+                cargarRoles();
+            })
+            .catch(error => {
+                console.error('Error al eliminar el rol:', error);
+            });
+    }
+});
+
+
+
+        });
+    </script>
+</body>
+</html>

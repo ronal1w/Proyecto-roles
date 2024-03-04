@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <title>Empleados</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Empleados</h1>
+
+        <!-- Botón para abrir el modal de creación y edición de empleados -->
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalCrearEditarEmpleado">
+            Crear/Editar Empleado
+        </button>
+
+        <!-- Tabla de empleados -->
+        <table id="tablaEmpleados" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Email</th>
+                    <th>Teléfono</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Aquí se llenará la tabla con los empleados -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal de creación y edición de empleados -->
+    <div class="modal fade" id="modalCrearEditarEmpleado" tabindex="-1" aria-labelledby="modalCrearEditarEmpleadoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalCrearEditarEmpleadoLabel">Crear/Editar Empleado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formCrearEditarEmpleado">
+                        <div class="mb-3">
+                            <label for="nombreEmpleado" class="form-label">Nombre:</label>
+                            <input type="text" class="form-control" id="nombreEmpleado" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="apellidoEmpleado" class="form-label">Apellido:</label>
+                            <input type="text" class="form-control" id="apellidoEmpleado" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="emailEmpleado" class="form-label">Email:</label>
+                            <input type="email" class="form-control" id="emailEmpleado" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="telefonoEmpleado" class="form-label">Teléfono:</label>
+                            <input type="number" class="form-control" id="telefonoEmpleado" required>
+                        </div>
+                        <input type="hidden" id="idEmpleado">
+                        <button type="button" class="btn btn-primary" id="guardarEmpleado">Guardar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- jQuery, Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Función para cargar los empleados en la tabla
+            function cargarEmpleados() {
+                axios.get('http://localhost/proyecto-roles/backend/empleados/read.php')
+                    .then(response => {
+                        const empleados = response.data;
+
+                        // Limpiar tabla antes de agregar datos
+                        $('#tablaEmpleados tbody').empty();
+
+                        // Llenar tabla con datos de empleados
+                        empleados.forEach(empleado => {
+                            $('#tablaEmpleados tbody').append(`
+                                <tr>
+                                    <td>${empleado.id}</td>
+                                    <td>${empleado.nombre}</td>
+                                    <td>${empleado.apellido}</td>
+                                    <td>${empleado.email}</td>
+                                    <td>${empleado.telefono}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-primary btn-sm editar-btn" data-bs-toggle="modal" data-bs-target="#modalCrearEditarEmpleado" data-id="${empleado.id}" data-nombre="${empleado.nombre}" data-apellido="${empleado.apellido}" data-email="${empleado.email}" data-telefono="${empleado.telefono}">Editar</button>
+                                        <button type="button" class="btn btn-danger btn-sm eliminar-btn" data-id="${empleado.id}">Eliminar</button>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error al obtener la lista de empleados:', error);
+                    });
+            }
+
+            cargarEmpleados();
+
+            // Función para limpiar el formulario
+            function limpiarFormulario() {
+                $('#idEmpleado').val('');
+                $('#nombreEmpleado').val('');
+                $('#apellidoEmpleado').val('');
+                $('#emailEmpleado').val('');
+                $('#telefonoEmpleado').val('');
+            }
+
+            // Evento para limpiar el formulario al abrir el modal de creación o edición de empleado
+            $('#modalCrearEditarEmpleado').on('show.bs.modal', function(event) {
+                limpiarFormulario();
+            });
+
+            // Función para guardar un nuevo empleado
+            function guardarEmpleado(nombre, apellido, email, telefono) {
+                console.log('Guardando empleado:', nombre, apellido, email, telefono); // Imprimir mensaje en consola
+                axios.post('http://localhost/proyecto-roles/backend/empleados/create.php', { nombre, apellido, email, telefono })
+                    .then(() => {
+                        $('#modalCrearEditarEmpleado').modal('hide');
+                        cargarEmpleados(); // Recargar la tabla para mostrar los cambios
+                    })
+                    .catch(error => {
+                        console.error('Error al guardar el empleado:', error);
+                    });
+            }
+
+
+
+            // Función para editar un empleado existente
+            function editarEmpleado(id, nombre, apellido, email, telefono) {
+    console.log('Editando empleado:', id, nombre, apellido, email, telefono); // Verificar si se ejecuta la función
+    axios.put(`http://localhost/proyecto-roles/backend/empleados/update.php?id=${id}`, {id, nombre, apellido, email, telefono })
+        .then(() => {
+            $('#modalCrearEditarEmpleado').modal('hide');
+            cargarEmpleados(); // Recargar la tabla para mostrar los cambios
+        })
+        .catch(error => {
+            console.error('Error al editar el empleado:', error);
+        });
+}
+
+
+            // Evento para enviar el formulario de creación o edición de empleado
+            $('#guardarEmpleado').on('click', function(event) {
+                event.preventDefault();
+                const id = $('#idEmpleado').val();
+                const nombre = $('#nombreEmpleado').val();
+                const apellido = $('#apellidoEmpleado').val();
+                const email = $('#emailEmpleado').val();
+                const telefono = $('#telefonoEmpleado').val();
+                if (id) {
+                    editarEmpleado(id, nombre, apellido, email, telefono); // Si hay un ID, editar el empleado existente
+                } else {
+                    guardarEmpleado(nombre, apellido, email, telefono); // Si no hay un ID, guardar un nuevo empleado
+                }
+            });
+
+            // Evento para llenar el formulario con los datos del empleado al editar
+            $('#tablaEmpleados').on('click', '.editar-btn', function() {
+                const id = $(this).data('id');
+                const nombre = $(this).data('nombre');
+                const apellido = $(this).data('apellido');
+                const email = $(this).data('email');
+                const telefono = $(this).data('telefono');
+                $('#idEmpleado').val(id);
+                $('#nombreEmpleado').val(nombre);
+                $('#apellidoEmpleado').val(apellido);
+                $('#emailEmpleado').val(email);
+                $('#telefonoEmpleado').val(telefono);
+            });
+
+            // Evento para eliminar un empleado
+            $('#tablaEmpleados').on('click', '.eliminar-btn', function() {
+                const id = $(this).data('id');
+                if (confirm('¿Estás seguro de eliminar este empleado?')) {
+                    axios.delete('http://localhost/proyecto-roles/backend/empleados/delete.php', { data: { id } })
+                        .then(() => {
+                            console.log('Empleado eliminado correctamente');
+                            cargarEmpleados();
+                        })
+                        .catch(error => {
+                            console.error('Error al eliminar el empleado:', error);
+                        });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

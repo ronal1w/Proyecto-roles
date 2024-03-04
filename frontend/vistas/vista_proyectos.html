@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <title>Proyectos</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Proyectos</h1>
+
+        <!-- Botón para abrir el modal de creación y edición de proyectos -->
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalCrearEditarProyecto">
+            Crear/Editar Proyecto
+        </button>
+         <!-- imprime el reporte -->
+        <a href="http://localhost/proyecto-roles/backend/pdf/proyectos_reporte.php" class="btn btn-success mb-3" target="_blank">
+            Imprimir Reporte
+        </a>
+        
+
+        <!-- Tabla de proyectos -->
+        <table id="tablaProyectos" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Fecha de Inicio</th>
+                    <th>Fecha de Fin</th>
+                    <th>Responsable</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Aquí se llenará la tabla con los proyectos -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal de creación y edición de proyectos -->
+    <div class="modal fade" id="modalCrearEditarProyecto" tabindex="-1" aria-labelledby="modalCrearEditarProyectoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalCrearEditarProyectoLabel">Crear/Editar Proyecto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formCrearEditarProyecto">
+                        <div class="mb-3">
+                            <label for="nombreProyecto" class="form-label">Nombre:</label>
+                            <input type="text" class="form-control" id="nombreProyecto" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="descripcionProyecto" class="form-label">Descripción:</label>
+                            <input type="text" class="form-control" id="descripcionProyecto" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fechaInicioProyecto" class="form-label">Fecha de Inicio:</label>
+                            <input type="date" class="form-control" id="fechaInicioProyecto" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fechaFinProyecto" class="form-label">Fecha de Fin:</label>
+                            <input type="date" class="form-control" id="fechaFinProyecto">
+                        </div>
+                        <div class="mb-3">
+                            <label for="responsableProyecto" class="form-label">Responsable:</label>
+                            <select class="form-select" id="responsableProyecto" required>
+                                <!-- Opciones del select se llenarán dinámicamente al cargar la página -->
+                            </select>
+                        </div>                        
+                        <input type="hidden" id="idProyecto">
+                        <button type="button" class="btn btn-primary" id="guardarProyecto">Guardar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery, Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Función para cargar los proyectos en la tabla
+            function cargarProyectos() {
+    axios.get('http://localhost/proyecto-roles/backend/proyectos/read.php')
+        .then(response => {
+            const proyectos = response.data;
+
+            // Limpiar tabla antes de agregar datos
+            $('#tablaProyectos tbody').empty();
+
+            // Llenar tabla con datos de proyectos
+            proyectos.forEach(proyecto => {
+                $('#tablaProyectos tbody').append(`
+                    <tr>
+                        <td>${proyecto.id}</td>
+                        <td>${proyecto.nombre}</td>
+                        <td>${proyecto.descripcion}</td>
+                        <td>${proyecto.fecha_inicio}</td>
+                        <td>${proyecto.fecha_fin}</td>
+                        <td>${proyecto.id_responsable}</td>
+                        <td>
+                            <button type="button" class="btn btn-primary btn-sm editar-btn" data-bs-toggle="modal" data-bs-target="#modalCrearEditarProyecto" data-id="${proyecto.id}" data-nombre="${proyecto.nombre}" data-descripcion="${proyecto.descripcion}" data-fecha-inicio="${proyecto.fecha_inicio}" data-fecha-fin="${proyecto.fecha_fin}" data-responsable="${proyecto.id_responsable}">Editar</button>
+                            <button type="button" class="btn btn-danger btn-sm eliminar-btn" data-id="${proyecto.id}">Eliminar</button>
+                        </td>
+                    </tr>
+                `);
+            });
+
+            // Llenar select de responsables
+            cargarResponsables(proyectos.map(proyecto => proyecto.id_responsable));
+        })
+        .catch(error => {
+            console.error('Error al obtener la lista de proyectos:', error);
+        });
+}
+
+
+
+            
+
+            // Cargar los proyectos al cargar la página
+            cargarProyectos();
+            
+
+// Función para limpiar el formulario
+function limpiarFormulario() {
+    const idUsuario = $('#idUsuario').val();
+    if (!idUsuario) {
+        $('#emailUsuario').val('');
+        $('#nombreUsuario').val('');
+        $('#apellidoUsuario').val('');
+        $('#rolUsuario').val('');
+        $('#passwordUsuario').val('');
+    }
+
+}
+
+ // Evento para limpiar el formulario al abrir el modal de creación o edición de usuario
+ $('#modalCrearEditarProyecto').on('show.bs.modal', function(event) {
+                limpiarFormulario();
+            });
+
+            // Evento para enviar el formulario de creación o edición de proyecto
+            $('#guardarProyecto').on('click', function(event) {
+                event.preventDefault();
+                const id = $('#idProyecto').val();
+                const nombre = $('#nombreProyecto').val();
+                const descripcion = $('#descripcionProyecto').val();
+                const fechaInicio = $('#fechaInicioProyecto').val();
+                const fechaFin = $('#fechaFinProyecto').val();
+                const responsable = $('#responsableProyecto').val();
+                if (id) {
+                    editarProyecto(id, nombre, descripcion, fechaInicio, fechaFin, responsable); // Si hay un ID, editar el proyecto existente
+                } else {
+                    guardarProyecto(nombre, descripcion, fechaInicio, fechaFin, responsable); // Si no hay un ID, guardar un nuevo proyecto
+                }
+            });
+
+
+
+
+            // Función para guardar un nuevo proyecto
+            function guardarProyecto(nombre, descripcion, fechaInicio, fechaFin, responsable) {
+                console.log('Guardando proyecto:', nombre, descripcion, fechaInicio, fechaFin, responsable);
+                axios.post('http://localhost/proyecto-roles/backend/proyectos/create.php', {
+                    nombre: nombre,
+                    descripcion: descripcion,
+                    fecha_inicio: fechaInicio,
+                    fecha_fin: fechaFin,
+                    id_responsable: responsable
+                })
+                .then(() => {
+                    $('#modalCrearEditarProyecto').modal('hide');
+                    cargarProyectos(); // Recargar la tabla para mostrar los cambios
+                })
+                .catch(error => {
+                    console.error('Error al guardar el proyecto:', error);
+                });
+            }
+
+            // Función para editar un proyecto existente
+            function editarProyecto(id, nombre, descripcion, fechaInicio, fechaFin, responsable) {
+                console.log('Editando proyecto:', id, nombre, descripcion, fechaInicio, fechaFin, responsable);
+                axios.put(`http://localhost/proyecto-roles/backend/proyectos/update.php`, {
+                id: id,
+                nombre: nombre,
+                descripcion: descripcion,
+                fecha_inicio: fechaInicio,
+                fecha_fin: fechaFin,
+               id_responsable: responsable
+            })
+
+                    .then(() => {
+                        $('#modalCrearEditarProyecto').modal('hide');
+                        cargarProyectos(); // Recargar la tabla para mostrar los cambios
+                    })
+                    .catch(error => {
+                        console.error('Error al editar el proyecto:', error);
+                    });
+            }
+
+            // Evento para llenar el formulario con los datos del proyecto al editar
+            $('#tablaProyectos').on('click', '.editar-btn', function() {
+                const id = $(this).data('id');
+                const nombre = $(this).data('nombre');
+                const descripcion = $(this).data('descripcion');
+                const fechaInicio = $(this).data('fecha-inicio');
+                const fechaFin = $(this).data('fecha-fin');
+                const responsable = $(this).data('responsable');
+                $('#idProyecto').val(id);
+                $('#nombreProyecto').val(nombre);
+                $('#descripcionProyecto').val(descripcion);
+                $('#fechaInicioProyecto').val(fechaInicio);
+                $('#fechaFinProyecto').val(fechaFin);
+                $('#responsableProyecto').val(responsable);
+            });
+
+                      //select
+                      function cargarResponsables(idsResponsables) {
+    axios.get('http://localhost/proyecto-roles/backend/empleados/read.php')
+        .then(response => {
+            const empleados = response.data;
+
+            // Limpiar select antes de agregar opciones
+            $('#responsableProyecto').empty();
+
+            // Agregar una opción vacía al principio
+            $('#responsableProyecto').append('<option value="">Seleccionar responsable</option>');
+
+            // Agregar opciones de empleados al select
+            empleados.forEach(empleado => {
+                $('#responsableProyecto').append(`<option value="${empleado.id}" ${idsResponsables.includes(empleado.id) ? 'selected' : ''}>${empleado.nombre} ${empleado.apellido}</option>`);
+            });
+        })
+        .catch(error => {
+            console.error('Error al obtener la lista de empleados:', error);
+        });
+}
+
+            // Evento para eliminar un proyecto
+            $('#tablaProyectos').on('click', '.eliminar-btn', function() {
+                const id = $(this).data('id');
+                if (confirm('¿Estás seguro de eliminar este proyecto?')) {
+                    axios.delete('http://localhost/proyecto-roles/backend/proyectos/delete.php', { data: { id } })
+                        .then(() => {
+                            console.log('Proyecto eliminado correctamente');
+                            cargarProyectos();
+                        })
+                        .catch(error => {
+                            console.error('Error al eliminar el proyecto:', error);
+                        });
+                        
+                }
+            });
+        });
+    </script>
+</body>
+</html>
