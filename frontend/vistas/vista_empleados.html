@@ -1,16 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<div id="menuContainer"></div>
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <title>Empleados</title>
-</head>
-<body>
     <div class="container mt-5">
         <h1 class="text-center mb-4">Empleados</h1>
 
@@ -73,13 +62,46 @@
 
     
     <!-- jQuery, Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="../assets/js/jquery.min.js"></script>
+    <script src="../assets/js/bootstrap.bundle.min.js"></script>
     <!-- Axios -->
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="../assets/js/axios.min.js"></script>
 
     <script>
+
+                        // Obtener el contenedor del menú
+const menuContainer = document.getElementById('menuContainer');
+
+// Obtener el menú utilizando fetch
+fetch('../components/menu.html')
+    .then(response => response.text())
+    .then(data => {
+        // Insertar el contenido del menú en el contenedor
+        menuContainer.innerHTML = data;
+    })
+    .catch(error => {
+        console.error('Error al cargar el header:', error);
+    });
+
+// Obtener el contenedor del header
+const headerContainer = document.getElementById('headerContainer');
+
+    // Obtener el contenedor del footer
+const footerContainer = document.getElementById('footerContainer');
+
+// Obtener el footer utilizando fetch
+fetch('../components/footer.html')
+    .then(response => response.text())
+    .then(data => {
+        // Insertar el contenido del footer en el contenedor
+        footerContainer.innerHTML = data;
+    })
+    .catch(error => {
+        console.error('Error al cargar el footer:', error);
+    });
+
+
+    
         $(document).ready(function() {
             // Función para cargar los empleados en la tabla
             function cargarEmpleados() {
