@@ -86,6 +86,17 @@
 
     <script>
 
+          // Verificar si el usuario ha iniciado sesión
+          if (!isLoggedIn()) {
+            // Redirigir a la página de inicio de sesión
+            window.location.href = '../login.html';
+        }
+
+        function isLoggedIn() {
+            // Verificar si existe una sesión de usuario
+            // Puedes implementar esta función según cómo manejes las sesiones en tu aplicación
+            return sessionStorage.getItem('isLoggedIn') === 'true';
+        }
                         // Obtener el contenedor del menú
 const menuContainer = document.getElementById('menuContainer');
 

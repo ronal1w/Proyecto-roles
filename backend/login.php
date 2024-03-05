@@ -1,8 +1,10 @@
 <?php
-
 header('Content-Type: application/json; charset=utf-8');
 
 require_once '../config/database.php';
+require_once '../vendor/autoload.php'; // Asegúrate de incluir el autoload de composer
+
+use Firebase\JWT\JWT;
 
 $json = file_get_contents('php://input');
 $data = json_decode($json, true);
@@ -16,8 +18,17 @@ $stmt->execute(['email' => $email, 'password' => $password]);
 $user = $stmt->fetch();
 
 if ($user) {
+    $user_id = $user['id'];
+    $secret_key = 'your_secret_key'; // La clave secreta que usas para firmar el token JWT
+
+    // Crear el token JWT con el user_id
+    $payload = array(
+        'user_id' => $user_id
+    );
+    $token = JWT::encode($payload, $secret_key, 'HS256');
+
     session_start();
-    $_SESSION['user_id'] = $user['id'];
+    $_SESSION['user_id'] = $user_id;
     $_SESSION['email'] = $user['email'];
     $_SESSION['first_name'] = $user['first_name'];
     $_SESSION['last_name'] = $user['last_name'];
@@ -32,8 +43,7 @@ if ($user) {
         $_SESSION['role'] = 'User';
     }
 
-    echo json_encode(['success' => true, 'role' => $_SESSION['role']]);
+    echo json_encode(['success' => true, 'role' => $_SESSION['role'], 'token' => $token]);
 } else {
     echo json_encode(['success' => false, 'message' => 'Email o contraseña incorrectos']);
 }
-?>

@@ -8,9 +8,11 @@
     <title>Login</title>
     <!-- Bootstrap CSS -->
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
-            background-color: #f0f0f0; /* Gris claro */
+            background-color: #b3afaf; /* Gris claro */
         }
     </style>
 </head>
@@ -46,10 +48,6 @@
     <!-- Axios -->
     <script src="assets/js/axios.min.js"></script>
     <script>
-        $(function() {
-            $("#menu").load("../components/menu.html");
-        });
-
         document.getElementById('loginForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const email = document.getElementById('email').value;
@@ -63,7 +61,13 @@
                 .then(response => {
                     console.log(response.data);
                     alert('Login successful');
-                    // Aquí puedes redirigir a otra página si el login fue exitoso
+
+                    // Guardar el estado de inicio de sesión en sessionStorage
+                    sessionStorage.setItem('isLoggedIn', 'true');
+
+                    // Redirigir a la página de inicio
+                    window.location.href = 'vistas/inicio.html';
+                    
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -74,3 +78,4 @@
 </body>
 
 </html>
+

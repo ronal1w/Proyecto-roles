@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Inicio</title>
+    <!-- Bootstrap CSS -->
+    <link href="../assets/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f0f0; /* Gris claro */
+        }
+    </style>
+</head>
+
+<body>
+    <div id="menuContainer"></div>
+
+    <div class="container mt-5">
+        <h5 class="text-center mb-4">Panel De Inicio</h5>
+        <div class="card p-4 mb-4 shadow-sm rounded">
+            <!-- Tabla de roles -->
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Proyectos</h5>
+                            <p class="card-text">Puedes Imprimir un reporte de los proyectos.</p>
+                            <a href="#" class="btn btn-primary">Imprimir Proyectos</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Empleados</h5>
+                            <p class="card-text">Puedes imprimir un reporte de empleados.</p>
+                            <a href="#" class="btn btn-primary">Imprimir Empleados</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="footerContainer"></div>
+
+    <!-- jQuery, Bootstrap JS -->
+    <script src="../assets/js/jquery.min.js"></script>
+    <script src="../assets/js/bootstrap.bundle.min.js"></script>
+    <!-- Axios -->
+    <script src="../assets/js/axios.min.js"></script>
+
+    <script>
+        // Verificar si el usuario ha iniciado sesión
+        if (!isLoggedIn()) {
+            // Redirigir a la página de inicio de sesión
+            window.location.href = '../login.html';
+        }
+
+        function isLoggedIn() {
+            // Verificar si existe una sesión de usuario
+            // Puedes implementar esta función según cómo manejes las sesiones en tu aplicación
+            return sessionStorage.getItem('isLoggedIn') === 'true';
+        }
+
+        // Obtener el contenedor del menú
+        const menuContainer = document.getElementById('menuContainer');
+
+        // Obtener el menú utilizando fetch
+        fetch('../components/menu.html')
+            .then(response => response.text())
+            .then(data => {
+                // Insertar el contenido del menú en el contenedor
+                menuContainer.innerHTML = data;
+            })
+            .catch(error => {
+                console.error('Error al cargar el header:', error);
+            });
+
+        // Obtener el contenedor del footer
+        const footerContainer = document.getElementById('footerContainer');
+
+        // Obtener el footer utilizando fetch
+        fetch('../components/footer.html')
+            .then(response => response.text())
+            .then(data => {
+                // Insertar el contenido del footer en el contenedor
+                footerContainer.innerHTML = data;
+            })
+            .catch(error => {
+                console.error('Error al cargar el footer:', error);
+            });
+
+    </script>
+
+</body>
+
+</html>

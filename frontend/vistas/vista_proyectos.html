@@ -1,4 +1,22 @@
-<div id="menuContainer"></div>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empleados</title>
+    <!-- Bootstrap CSS -->
+    <link href="../assets/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f0f0; /* Gris claro */
+        }
+    </style>
+</head>
+
+<body>
+    <div id="menuContainer"></div>
 
     <div class="container mt-5">
         <h1 class="text-center mb-4">Proyectos</h1>
@@ -79,6 +97,18 @@
     <script src="../assets/js/axios.min.js"></script>
 
     <script>
+
+          // Verificar si el usuario ha iniciado sesión
+          if (!isLoggedIn()) {
+            // Redirigir a la página de inicio de sesión
+            window.location.href = '../login.html';
+        }
+
+        function isLoggedIn() {
+            // Verificar si existe una sesión de usuario
+            // Puedes implementar esta función según cómo manejes las sesiones en tu aplicación
+            return sessionStorage.getItem('isLoggedIn') === 'true';
+        }
 
                         // Obtener el contenedor del menú
 const menuContainer = document.getElementById('menuContainer');
