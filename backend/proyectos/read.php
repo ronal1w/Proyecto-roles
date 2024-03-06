@@ -6,7 +6,11 @@ require_once '../../config/database.php';
 
 // Obtiene todos los proyectos de la base de datos
 try {
-    $stmt = $pdo->query("SELECT * FROM proyectos");
+    $stmt = $pdo->query("SELECT 
+    p.id, p.nombre, p.descripcion, p.fecha_inicio, p.fecha_fin, e.nombre AS id_responsable 
+    FROM  proyectos AS p INNER JOIN empleados AS e 
+     ON p.id_responsable = e.id
+    ");
     $proyectos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Devuelve los proyectos en formato JSON

@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 
+require_once '../config/jwt.php';
 require_once '../config/database.php';
 require_once '../vendor/autoload.php'; // Asegúrate de incluir el autoload de composer
 
@@ -19,7 +20,7 @@ $user = $stmt->fetch();
 
 if ($user) {
     $user_id = $user['id'];
-    $secret_key = 'your_secret_key'; // La clave secreta que usas para firmar el token JWT
+    $secret_key = 'ron_melgar'; // La clave secreta que usas para firmar el token JWT
 
     // Crear el token JWT con el user_id
     $payload = array(
@@ -47,3 +48,4 @@ if ($user) {
 } else {
     echo json_encode(['success' => false, 'message' => 'Email o contraseña incorrectos']);
 }
+?>

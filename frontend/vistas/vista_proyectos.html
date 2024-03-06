@@ -105,10 +105,13 @@
         }
 
         function isLoggedIn() {
-            // Verificar si existe una sesión de usuario
-            // Puedes implementar esta función según cómo manejes las sesiones en tu aplicación
-            return sessionStorage.getItem('isLoggedIn') === 'true';
-        }
+    // Verificar si existe una sesión de usuario
+    // manejes las sesiones en tu aplicación
+    const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+    const role = sessionStorage.getItem('role');
+    return isLoggedIn && (role === 'Admin' || role === 'Moderator');
+}
+
 
                         // Obtener el contenedor del menú
 const menuContainer = document.getElementById('menuContainer');

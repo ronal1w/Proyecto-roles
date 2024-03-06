@@ -48,32 +48,36 @@
     <!-- Axios -->
     <script src="assets/js/axios.min.js"></script>
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
 
-            console.log(email, password);
-            axios.post('http://localhost/proyecto-roles/backend/login.php', {
-                    email: email,
-                    password: password
-                })
-                .then(response => {
-                    console.log(response.data);
-                    alert('Login successful');
+    axios.post('http://localhost/proyecto-roles/backend/login.php', {
+            email: email,
+            password: password
+        })
+        .then(response => {
+            console.log(response.data);
+            alert('Login successful');
 
-                    // Guardar el estado de inicio de sesión en sessionStorage
-                    sessionStorage.setItem('isLoggedIn', 'true');
+            // Guardar el estado de inicio de sesión en sessionStorage
+            sessionStorage.setItem('isLoggedIn', 'true');
 
-                    // Redirigir a la página de inicio
-                    window.location.href = 'vistas/inicio.html';
-                    
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Login failed. Please check your credentials.');
-                });
+            sessionStorage.setItem('role', response.data.role);
+
+            // Guardar el token de sesión en sessionStorage
+            sessionStorage.setItem('token', response.data.token);
+
+            // Redirigir a la página de inicio
+            window.location.href = 'vistas/inicio.html';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Login failed. Please check your credentials.');
         });
+});
+
     </script>
 </body>
 

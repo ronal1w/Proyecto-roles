@@ -88,12 +88,14 @@
             window.location.href = '../login.html';
         }
 
-        function isLoggedIn() {
-            // Verificar si existe una sesión de usuario
-            // Puedes implementar esta función según cómo manejes las sesiones en tu aplicación
-            return sessionStorage.getItem('isLoggedIn') === 'true';
-        }
-                // Obtener el contenedor del menú
+     // Verificar si el usuario ha iniciado sesión y es administrador
+function isLoggedIn() {
+    // Verificar si existe una sesión de usuario y si es administrador
+    // Puedes implementar esta función según cómo manejes las sesiones y roles en tu aplicación
+    return sessionStorage.getItem('isLoggedIn') === 'true' && sessionStorage.getItem('role') === 'Admin';
+}
+
+// Obtener el contenedor del menú
 const menuContainer = document.getElementById('menuContainer');
 
 // Obtener el menú utilizando fetch
@@ -108,7 +110,7 @@ fetch('../components/menu.html')
     });
 
 
-    // Obtener el contenedor del footer
+// Obtener el contenedor del footer
 const footerContainer = document.getElementById('footerContainer');
 
 // Obtener el footer utilizando fetch
@@ -122,113 +124,113 @@ fetch('../components/footer.html')
         console.error('Error al cargar el footer:', error);
     });
 
+ // Cargar roles al cargar la página
+ cargarRoles();
+
+function cargarRoles() {
+    axios.post('http://localhost/proyecto-roles/backend/roles/read.php', {
+            token: sessionStorage.getItem('token')
+        })
+        .then(response => {
+            const roles = response.data;
 
 
+        // Limpiar tabla antes de agregar datos
+        $('#tablaRoles tbody').empty();
 
-        $(document).ready(function() {
-            function cargarRoles() {
-                axios.get('http://localhost/proyecto-roles/backend/roles/read.php')
-                    .then(response => {
-                        const roles = response.data;
+        // Llenar tabla con datos de roles
+        roles.forEach(role => {
+            $('#tablaRoles tbody').append(`
+                <tr>
+                    <td>${role.id}</td>
+                    <td>${role.name}</td>
+                    <td>
+                        <button type="button" class="btn btn-primary btn-sm editar-btn" data-bs-toggle="modal" data-bs-target="#modalCrearEditarRol" data-id="${role.id}" data-name="${role.name}">Editar</button>
+                        <button type="button" class="btn btn-danger btn-sm eliminar-btn" data-id="${role.id}">Eliminar</button>
+                    </td>
+                </tr>
+            `);
+        });
+    })
+    .catch(error => {
+        console.error('Error al obtener la lista de roles:', error);
+    });
 
-                        // Limpiar tabla antes de agregar datos
-                        $('#tablaRoles tbody').empty();
+}
 
-                        // Llenar tabla con datos de roles
-                        roles.forEach(role => {
-                            $('#tablaRoles tbody').append(`
-                                <tr>
-                                    <td>${role.id}</td>
-                                    <td>${role.name}</td>
-                                    <td>
-                                        <button type="button" class="btn btn-primary btn-sm editar-btn" data-bs-toggle="modal" data-bs-target="#modalCrearEditarRol" data-id="${role.id}" data-name="${role.name}">Editar</button>
-                                        <button type="button" class="btn btn-danger btn-sm eliminar-btn" data-id="${role.id}">Eliminar</button>
-                                    </td>
-                                </tr>
-                            `);
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error al obtener la lista de roles:', error);
-                    });
-            }
+cargarRoles();
 
-            cargarRoles();
-
-            // Función para limpiar el formulario
+// Función para limpiar el formulario
 function limpiarFormulario() {
-    $('#idRol').val('');
-    $('#nombreRol').val('');
+$('#idRol').val('');
+$('#nombreRol').val('');
 }
 
 // Evento para limpiar el formulario al abrir el modal de creación o edición de rol
 $('#modalCrearEditarRol').on('show.bs.modal', function(event) {
-    limpiarFormulario();
+limpiarFormulario();
 });
 
 
-            // Función para guardar un nuevo rol
-            function guardarRol(name) {
-                axios.post('http://localhost/proyecto-roles/backend/roles/create.php', { name })
-                    .then(() => {
-                        $('#modalCrearEditarRol').modal('hide');
-                        cargarRoles(); // Recargar la tabla para mostrar los cambios
-                    })
-                    .catch(error => {
-                        console.error('Error al guardar el rol:', error);
-                    });
-            }
+// Función para guardar un nuevo rol
+function guardarRol(name) {
 
-            // Función para editar un rol existente
-            function editarRol(id, name) {
-                axios.put(`http://localhost/proyecto-roles/backend/roles/update.php?id=${id}`, { id, name })
-                    .then(() => {
-                        $('#modalCrearEditarRol').modal('hide');
-                        cargarRoles(); // Recargar la tabla para mostrar los cambios
-                    })
-                    .catch(error => {
-                        console.error('Error al editar el rol:', error);
-                    });
-            }
+    .then(() => {axios.post('http://localhost/proyecto-roles/backend/roles/create.php', { token: sessionStorage.getItem('token'), name })
+        $('#modalCrearEditarRol').modal('hide');
+        cargarRoles(); // Recargar la tabla para mostrar los cambios
+    })
+    .catch(error => {
+        console.error('Error al guardar el rol:', error);
+    });
+}
 
-            // Evento para enviar el formulario de creación o edición de rol
-            $('#guardarRol').on('click', function(event) {
-                event.preventDefault();
-                const id = $('#idRol').val();
-                const name = $('#nombreRol').val();
-                if (id) {
-                    editarRol(id, name); // Si hay un ID, editar el rol existente
-                } else {
-                    guardarRol(name); // Si no hay un ID, guardar un nuevo rol
-                }
-            });
+// Función para editar un rol existente
+function editarRol(id, name) {
+axios.put(`http://localhost/proyecto-roles/backend/roles/update.php?id=${id}`, { token: sessionStorage.getItem('token'), id, name })
+    .then(() => {
+        $('#modalCrearEditarRol').modal('hide');
+        cargarRoles(); // Recargar la tabla para mostrar los cambios
+    })
+    .catch(error => {
+        console.error('Error al editar el rol:', error);
+    });
+}
 
-            $('#tablaRoles').on('click', '.editar-btn', function() {
-                const id = $(this).data('id'); // Obtener el ID del rol del botón de editar
-                const name = $(this).data('name');
-                $('#idRol').val(id);
-                $('#nombreRol').val(name);
-            });
-
-            $('#tablaRoles').on('click', '.eliminar-btn', function() {
-    const id = $(this).data('id');
-    console.log('ID del rol a eliminar:', id); // Verificar que se esté obteniendo el ID correctamente
-    if (confirm('¿Estás seguro de eliminar este rol?')) {
-        axios.delete('http://localhost/proyecto-roles/backend/roles/delete.php', { data: { id } })
-            .then(() => {
-                console.log('Rol eliminado correctamente');
-                cargarRoles();
-            })
-            .catch(error => {
-                console.error('Error al eliminar el rol:', error);
-            });
-    }
+// Evento para enviar el formulario de creación o edición de rol
+$('#guardarRol').on('click', function(event) {
+event.preventDefault();
+const id = $('#idRol').val();
+const name = $('#nombreRol').val();
+if (id) {
+    editarRol(id, name); // Si hay un ID, editar el rol existente
+} else {
+    guardarRol(name); // Si no hay un ID, guardar un nuevo rol
+}
 });
 
+$('#tablaRoles').on('click', '.editar-btn', function() {
+const id = $(this).data('id'); // Obtener el ID del rol del botón de editar
+const name = $(this).data('name');
+$('#idRol').val(id);
+$('#nombreRol').val(name);
+});
 
-
+$('#tablaRoles').on('click', '.eliminar-btn', function() {
+const id = $(this).data('id');
+console.log('ID del rol a eliminar:', id); // Verificar que se esté obteniendo el ID correctamente
+if (confirm('¿Estás seguro de eliminar este rol?')) {
+    axios.delete('http://localhost/proyecto-roles/backend/roles/delete.php', { data: { token: sessionStorage.getItem('token'), id } })
+        .then(() => {
+            console.log('Rol eliminado correctamente');
+            cargarRoles();
+        })
+        .catch(error => {
+            console.error('Error al eliminar el rol:', error);
         });
-    </script>
-    
+}
+});
+
+</script>
+
 </body>
 </html>

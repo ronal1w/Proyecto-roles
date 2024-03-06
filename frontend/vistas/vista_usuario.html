@@ -92,11 +92,12 @@
             window.location.href = '../login.html';
         }
 
-        function isLoggedIn() {
-            // Verificar si existe una sesión de usuario
-            // Puedes implementar esta función según cómo manejes las sesiones en tu aplicación
-            return sessionStorage.getItem('isLoggedIn') === 'true';
-        }
+     // Verificar si el usuario ha iniciado sesión y es administrador
+     function isLoggedIn() {
+    // Verificar si existe una sesión de usuario y si es administrador
+    // Puedes implementar esta función según cómo manejes las sesiones y roles en tu aplicación
+    return sessionStorage.getItem('isLoggedIn') === 'true' && sessionStorage.getItem('role') === 'Admin';
+}
                         // Obtener el contenedor del menú
 const menuContainer = document.getElementById('menuContainer');
 
@@ -116,7 +117,7 @@ fetch('../components/menu.html')
         $(document).ready(function() {
             // Función para cargar los usuarios en la tabla
             function cargarUsuarios() {
-                axios.get('http://localhost/proyecto-roles/backend/users/read.php')
+                axios.post('http://localhost/proyecto-roles/backend/users/read.php',  { token: sessionStorage.getItem('token') } )
                     .then(response => {
                         const usuarios = response.data;
 
@@ -165,7 +166,7 @@ function limpiarFormulario() {
           // Función para guardar un nuevo usuario
 function guardarUsuario(email, nombre, apellido, rol, contraseña) {
     console.log('Guardando usuario:', email, nombre, apellido, rol, contraseña); // Imprimir los datos antes de guardar
-    axios.post('http://localhost/proyecto-roles/backend/users/create.php', { email, first_name: nombre, last_name: apellido, role_id: rol, password: contraseña })
+    axios.post('http://localhost/proyecto-roles/backend/users/create.php', { token: sessionStorage.getItem('token'), email, first_name: nombre, last_name: apellido, role_id: rol, password: contraseña })
         .then(() => {
             $('#modalCrearEditarUsuario').modal('hide');
             cargarUsuarios(); // Recargar la tabla para mostrar los cambios
@@ -178,7 +179,7 @@ function guardarUsuario(email, nombre, apellido, rol, contraseña) {
 // Función para editar un usuario existente
 function editarUsuario(id, email, nombre, apellido, rol, contraseña) {
     console.log('Editando usuario:', id, email, nombre, apellido, rol, contraseña); // Imprimir los datos antes de editar
-    axios.put(`http://localhost/proyecto-roles/backend/users/update.php?id=${id}`, { id, email, first_name: nombre, last_name: apellido, role_id: rol, password: contraseña })
+    axios.put(`http://localhost/proyecto-roles/backend/users/update.php?id=${id}`, { token: sessionStorage.getItem('token'), id, email, first_name: nombre, last_name: apellido, role_id: rol, password: contraseña })
         .then(() => {
             $('#modalCrearEditarUsuario').modal('hide');
             cargarUsuarios(); // Recargar la tabla para mostrar los cambios
@@ -221,7 +222,8 @@ $('#tablaUsuarios').on('click', '.editar-btn', function() {
     $('#passwordUsuario').val(contraseña); // Agrega esta línea para establecer la contraseña en el formulario
 });
 
-axios.get('http://localhost/proyecto-roles/backend/roles/read.php')
+
+axios.post('http://localhost/proyecto-roles/backend/roles/read.php', { token: sessionStorage.getItem('token'), name })
     .then(response => {
         const roles = response.data;
         const select = document.getElementById('rolUsuario');
@@ -242,7 +244,7 @@ axios.get('http://localhost/proyecto-roles/backend/roles/read.php')
             $('#tablaUsuarios').on('click', '.eliminar-btn', function() {
                 const id = $(this).data('id');
                 if (confirm('¿Estás seguro de eliminar este usuario?')) {
-                    axios.delete('http://localhost/proyecto-roles/backend/users/delete.php', { data: { id } })
+                    axios.delete('http://localhost/proyecto-roles/backend/users/delete.php', { data: { token: sessionStorage.getItem('token') , id } })
                         .then(() => {
                             console.log('Usuario eliminado correctamente');
                             cargarUsuarios();
