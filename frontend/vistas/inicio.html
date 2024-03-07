@@ -57,31 +57,6 @@
 
 
 
-        document.getElementById('printProjectsBtn').addEventListener('click', function() {
-            var token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo3fQ.isD7pb0Ajr2b4sTbmr_Nn_KrgZZNdK3Jk9jK25w8qOk'; // Token de ejemplo
-            var url = 'http://localhost/proyecto-roles/backend/pdf/proyectos_reporte.php';
-
-            // Crea un objeto con la configuración de la solicitud
-            var requestOptions = {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ token: token }) // Convierte el objeto a JSON
-            };
-
-            // Realiza la solicitud fetch
-            fetch(url, requestOptions)
-                .then(response => response.blob())
-                .then(blob => {
-                    // Crea un objeto URL para el blob
-                    var url = URL.createObjectURL(blob);
-                    // Abre la URL en una nueva pestaña
-                    window.open(url);
-                })
-                .catch(error => console.error('Error:', error));
-        });
-
 
 
 
@@ -129,6 +104,33 @@
             .catch(error => {
                 console.error('Error al cargar el footer:', error);
             });
+
+            
+        document.getElementById('printProjectsBtn').addEventListener('click', function() {
+            var token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo3fQ.isD7pb0Ajr2b4sTbmr_Nn_KrgZZNdK3Jk9jK25w8qOk'; // Token de ejemplo
+            var url = 'http://localhost/proyecto-roles/backend/pdf/proyectos_reporte.php';
+
+            // Crea un objeto con la configuración de la solicitud
+            var requestOptions = {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ token: token }) // Convierte el objeto a JSON
+            };
+
+            // Realiza la solicitud fetch
+            fetch(url, requestOptions)
+                .then(response => response.blob())
+                .then(blob => {
+                    // Crea un objeto URL para el blob
+                    var url = URL.createObjectURL(blob);
+                    // Abre la URL en una nueva pestaña
+                    window.open(url);
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
 
     </script>
 
