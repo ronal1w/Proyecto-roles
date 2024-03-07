@@ -1,5 +1,17 @@
 <?php
+// Permitir solicitudes CORS desde cualquier origen
+header("Access-Control-Allow-Origin: *");
+// Permitir los métodos GET, POST, PUT, DELETE
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
+// Permitir los encabezados Content-Type y Authorization
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
 header('Content-Type: application/json; charset=utf-8');
+
+require_once '../../config/database.php';
+require_once '../../vendor/autoload.php'; // Asegúrate de incluir el autoload de composer
+
+use Firebase\JWT\JWT;
 
 // Obtiene el contenido JSON enviado en la solicitud
 $json = file_get_contents('php://input');
@@ -9,7 +21,7 @@ $data = json_decode($json, true);
 
 // Verifica si se han enviado los datos necesarios y si son válidos
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || 
-    !isset($data['nombre'], $data['apellido'], $data['email'], $data['telefono']) ||
+    !isset($data['nombre'], $data['apellido'], $data['email'], $data['telefono'], $data['token']) ||
     empty(trim($data['nombre'])) || 
     empty(trim($data['apellido'])) || 
     empty(trim($data['email'])) || 
@@ -21,14 +33,31 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' ||
     exit();
 }
 
+// Obtiene el token del usuario del array
+$token = $data['token'];
+
+// Verifica si el token recibido es el mismo que el generado durante el login
+$secret_key = 'ron_melgar'; // La misma clave secreta que usaste para firmar el token JWT
+$decoded_token = null;
+try {
+    $decoded_token = JWT::decode($token, $secret_key, array('HS256'));
+} catch (\Exception $e) {
+    http_response_code(401); // Unauthorized
+    echo json_encode(['error' => 'Token inválido']);
+    exit;
+}
+
+if (!$decoded_token || !isset($decoded_token->user_id)) {
+    http_response_code(401); // Unauthorized
+    echo json_encode(['error' => 'Token inválido']);
+    exit;
+}
+
 // Obtiene los datos del array
 $nombre = $data['nombre'];
 $apellido = $data['apellido'];
 $email = $data['email'];
 $telefono = $data['telefono'];
-
-// Crea una conexión a la base de datos
-require_once '../../config/database.php';
 
 // Verifica si el correo electrónico ya existe en la base de datos
 $stmt = $pdo->prepare("SELECT COUNT(*) AS count FROM empleados WHERE email = ?");

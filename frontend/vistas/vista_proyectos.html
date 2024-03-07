@@ -90,6 +90,7 @@
         </div>
     </div>
 
+    <div id="footerContainer"></div>
     <!-- jQuery, Bootstrap JS -->
     <script src="../assets/js/jquery.min.js"></script>
     <script src="../assets/js/bootstrap.bundle.min.js"></script>
@@ -113,8 +114,9 @@
 }
 
 
-                        // Obtener el contenedor del menú
+// Obtener el contenedor del menú
 const menuContainer = document.getElementById('menuContainer');
+
 
 // Obtener el menú utilizando fetch
 fetch('../components/menu.html')
@@ -127,11 +129,8 @@ fetch('../components/menu.html')
         console.error('Error al cargar el header:', error);
     });
 
-// Obtener el contenedor del header
-const headerContainer = document.getElementById('headerContainer');
 
-    // Obtener el contenedor del footer
-const footerContainer = document.getElementById('footerContainer');
+
 
 // Obtener el footer utilizando fetch
 fetch('../components/footer.html')
@@ -149,7 +148,7 @@ fetch('../components/footer.html')
         $(document).ready(function() {
             // Función para cargar los proyectos en la tabla
             function cargarProyectos() {
-    axios.get('http://localhost/proyecto-roles/backend/proyectos/read.php')
+    axios.post('http://localhost/proyecto-roles/backend/proyectos/read.php', { token: sessionStorage.getItem('token')  } )
         .then(response => {
             const proyectos = response.data;
 
@@ -230,7 +229,8 @@ function limpiarFormulario() {
             // Función para guardar un nuevo proyecto
             function guardarProyecto(nombre, descripcion, fechaInicio, fechaFin, responsable) {
                 console.log('Guardando proyecto:', nombre, descripcion, fechaInicio, fechaFin, responsable);
-                axios.post('http://localhost/proyecto-roles/backend/proyectos/create.php', {
+                axios.post('http://localhost/proyecto-roles/backend/proyectos/create.php', { 
+                    token: sessionStorage.getItem('token'), 
                     nombre: nombre,
                     descripcion: descripcion,
                     fecha_inicio: fechaInicio,
@@ -250,6 +250,7 @@ function limpiarFormulario() {
             function editarProyecto(id, nombre, descripcion, fechaInicio, fechaFin, responsable) {
                 console.log('Editando proyecto:', id, nombre, descripcion, fechaInicio, fechaFin, responsable);
                 axios.put(`http://localhost/proyecto-roles/backend/proyectos/update.php`, {
+                token: sessionStorage.getItem('token'),
                 id: id,
                 nombre: nombre,
                 descripcion: descripcion,
@@ -285,7 +286,7 @@ function limpiarFormulario() {
 
                       //select
                       function cargarResponsables(idsResponsables) {
-    axios.get('http://localhost/proyecto-roles/backend/empleados/read.php')
+    axios.get('http://localhost/proyecto-roles/backend/empleados/read.php',  { token: sessionStorage.getItem('token') })
         .then(response => {
             const empleados = response.data;
 
@@ -309,7 +310,7 @@ function limpiarFormulario() {
             $('#tablaProyectos').on('click', '.eliminar-btn', function() {
                 const id = $(this).data('id');
                 if (confirm('¿Estás seguro de eliminar este proyecto?')) {
-                    axios.delete('http://localhost/proyecto-roles/backend/proyectos/delete.php', { data: { id } })
+                    axios.delete('http://localhost/proyecto-roles/backend/proyectos/delete.php', { data: {token: sessionStorage.getItem('token'), id } })
                         .then(() => {
                             console.log('Proyecto eliminado correctamente');
                             cargarProyectos();

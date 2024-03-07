@@ -78,7 +78,7 @@
         </div>
     </div>
 
-    
+    <div id="footerContainer"></div>
     <!-- jQuery, Bootstrap JS -->
     <script src="../assets/js/jquery.min.js"></script>
     <script src="../assets/js/bootstrap.bundle.min.js"></script>
@@ -137,7 +137,7 @@ fetch('../components/footer.html')
         $(document).ready(function() {
             // Función para cargar los empleados en la tabla
             function cargarEmpleados() {
-                axios.get('http://localhost/proyecto-roles/backend/empleados/read.php')
+                axios.post('http://localhost/proyecto-roles/backend/empleados/read.php', { token: sessionStorage.getItem('token')  })
                     .then(response => {
                         const empleados = response.data;
 
@@ -185,7 +185,7 @@ fetch('../components/footer.html')
             // Función para guardar un nuevo empleado
             function guardarEmpleado(nombre, apellido, email, telefono) {
                 console.log('Guardando empleado:', nombre, apellido, email, telefono); // Imprimir mensaje en consola
-                axios.post('http://localhost/proyecto-roles/backend/empleados/create.php', { nombre, apellido, email, telefono })
+                axios.post('http://localhost/proyecto-roles/backend/empleados/create.php', { token: sessionStorage.getItem('token'), nombre, apellido, email, telefono })
                     .then(() => {
                         $('#modalCrearEditarEmpleado').modal('hide');
                         cargarEmpleados(); // Recargar la tabla para mostrar los cambios
@@ -200,7 +200,7 @@ fetch('../components/footer.html')
             // Función para editar un empleado existente
             function editarEmpleado(id, nombre, apellido, email, telefono) {
     console.log('Editando empleado:', id, nombre, apellido, email, telefono); // Verificar si se ejecuta la función
-    axios.put(`http://localhost/proyecto-roles/backend/empleados/update.php?id=${id}`, {id, nombre, apellido, email, telefono })
+    axios.put(`http://localhost/proyecto-roles/backend/empleados/update.php?id=${id}`, { token: sessionStorage.getItem('token'), id, nombre, apellido, email, telefono })
         .then(() => {
             $('#modalCrearEditarEmpleado').modal('hide');
             cargarEmpleados(); // Recargar la tabla para mostrar los cambios
@@ -244,7 +244,7 @@ fetch('../components/footer.html')
             $('#tablaEmpleados').on('click', '.eliminar-btn', function() {
                 const id = $(this).data('id');
                 if (confirm('¿Estás seguro de eliminar este empleado?')) {
-                    axios.delete('http://localhost/proyecto-roles/backend/empleados/delete.php', { data: { id } })
+                    axios.delete('http://localhost/proyecto-roles/backend/empleados/delete.php', { data: { token: sessionStorage.getItem('token'), id } })
                         .then(() => {
                             console.log('Empleado eliminado correctamente');
                             cargarEmpleados();

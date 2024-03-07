@@ -1,8 +1,10 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 
-// Crea una conexión a la base de datos
 require_once '../../config/database.php';
+require_once '../../vendor/autoload.php'; // Asegúrate de incluir el autoload de composer
+
+use Firebase\JWT\JWT;
 
 // Obtiene el contenido JSON enviado en la solicitud
 $json = file_get_contents('php://input');
@@ -11,31 +13,63 @@ $json = file_get_contents('php://input');
 $data = json_decode($json, true);
 
 // Verifica si se han enviado los datos necesarios
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($data['nombre'], $data['descripcion'], $data['fecha_inicio'])) {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || 
+    !isset($data['token'], $data['nombre'], $data['apellido'], $data['email'], $data['telefono'])) {
     http_response_code(400);
     echo json_encode(['error' => 'Datos incompletos']);
     exit();
 }
 
-// Obtiene los datos del array
-$nombre = $data['nombre'];
-$descripcion = $data['descripcion'];
-$fecha_inicio = $data['fecha_inicio'];
-$fecha_fin = isset($data['fecha_fin']) ? $data['fecha_fin'] : null;
-$id_responsable = isset($data['id_responsable']) ? $data['id_responsable'] : null;
+// Obtiene el token del usuario del array
+$token = $data['token'];
 
-// Crea un nuevo proyecto en la base de datos
+// Verifica si el token recibido es el mismo que el generado durante el login
+$secret_key = 'ron_melgar'; // La misma clave secreta que usaste para firmar el token JWT
+$decoded_token = null;
 try {
-    $stmt = $pdo->prepare("INSERT INTO proyectos (nombre, descripcion, fecha_inicio, fecha_fin, id_responsable) VALUES (?, ?, ?, ?, ?)");
-    $stmt->execute([$nombre, $descripcion, $fecha_inicio, $fecha_fin, $id_responsable]);
-
-    // Devuelve una respuesta exitosa
-    http_response_code(201);
-    echo json_encode(['message' => 'Proyecto creado correctamente']);
-} catch (PDOException $e) {
-    // En caso de error, devuelve un mensaje de error
-    http_response_code(500);
-    echo json_encode(['error' => 'Error al crear el proyecto: ' . $e->getMessage()]);
+    $decoded_token = JWT::decode($token, $secret_key, array('HS256'));
+} catch (\Exception $e) {
+    http_response_code(401); // Unauthorized
+    echo json_encode(['error' => 'Token inválido']);
+    exit;
 }
 
+if (!$decoded_token || !isset($decoded_token->user_id)) {
+    http_response_code(401); // Unauthorized
+    echo json_encode(['error' => 'Token inválido']);
+    exit;
+}
+
+// Obtiene el role_id del usuario
+$user_id = $decoded_token->user_id;
+$stmt = $pdo->prepare("SELECT role_id FROM users WHERE id = :user_id");
+$stmt->execute(['user_id' => $user_id]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+$role_id = $user['role_id'];
+
+// Verifica si el role_id es 1 o 2 y crea el proyecto, o devuelve un mensaje de error
+if ($role_id == 1 || $role_id == 2) {
+    try {
+        $nombre = $data['nombre'];
+        $apellido = $data['apellido'];
+        $email = $data['email'];
+        $telefono = $data['telefono'];
+        $fecha_inicio = date('Y-m-d'); // Fecha de inicio actual
+        $fecha_fin = isset($data['fecha_fin']) ? $data['fecha_fin'] : null;
+        $id_responsable = isset($data['id_responsable']) ? $data['id_responsable'] : null;
+
+        $stmt = $pdo->prepare("INSERT INTO proyectos (nombre, descripcion, fecha_inicio, fecha_fin, id_responsable) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$nombre, $descripcion, $fecha_inicio, $fecha_fin, $id_responsable]);
+
+        // Devuelve una respuesta exitosa
+        http_response_code(201);
+        echo json_encode(['message' => 'Proyecto creado correctamente']);
+    } catch (PDOException $e) {
+        // En caso de error, devuelve un mensaje de error
+        http_response_code(500);
+        echo json_encode(['error' => 'Error al crear el proyecto: ' . $e->getMessage()]);
+    }
+} else {
+    echo json_encode(['error' => 'Usuario no tiene permisos para crear un proyecto']);
+}
 ?>
