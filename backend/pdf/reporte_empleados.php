@@ -16,12 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit();
 }
 
-$stmt = $pdo->prepare("SELECT 
-p.id, p.nombre, p.descripcion, p.fecha_inicio, p.fecha_fin, e.nombre AS id_responsable 
-FROM  proyectos AS p INNER JOIN empleados AS e 
-ON p.id_responsable = e.id");
+$stmt = $pdo->prepare("SELECT * FROM empleados");
 $stmt->execute();
-$proyectos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$empleados = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $options = new Options();
 $options->set('isHtml5ParserEnabled', true);
@@ -34,7 +31,7 @@ $html = '
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Reporte de Proyectos</title>
+    <title>Reporte de Empleados</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -67,29 +64,27 @@ $html = '
 </head>
 <body>
     <div class="container">
-       <center> <h4>Reporte de Proyectos</h4> </center>
+        <h5>Reporte de Empleados</h5>
         <table>
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Nombre</th>
-                    <th>Descripción</th>
-                    <th>Fecha de Inicio</th>
-                    <th>Fecha de Fin</th>
-                    <th>Responsable</th>
+                    <th>Apellido</th>
+                    <th>Email</th>
+                    <th>Teléfono</th>
                 </tr>
             </thead>
             <tbody>';
 
-foreach ($proyectos as $proyecto) {
+foreach ($empleados as $empleado) {
     $html .= '
                 <tr>
-                    <td>' . $proyecto['id'] . '</td>
-                    <td>' . $proyecto['nombre'] . '</td>
-                    <td>' . $proyecto['descripcion'] . '</td>
-                    <td>' . $proyecto['fecha_inicio'] . '</td>
-                    <td>' . $proyecto['fecha_fin'] . '</td>
-                    <td>' . $proyecto['id_responsable'] . '</td>
+                    <td>' . $empleado['id'] . '</td>
+                    <td>' . $empleado['nombre'] . '</td>
+                    <td>' . $empleado['apellido'] . '</td>
+                    <td>' . $empleado['email'] . '</td>
+                    <td>' . $empleado['telefono'] . '</td>
                 </tr>';
 }
 
@@ -104,5 +99,5 @@ $dompdf->loadHtml($html);
 $dompdf->setPaper('A4', 'landscape');
 $dompdf->render();
 
-$dompdf->stream('reporte_proyectos.pdf', array('Attachment' => 0));
+$dompdf->stream('reporte_empleados.pdf', array('Attachment' => 0));
 ?>

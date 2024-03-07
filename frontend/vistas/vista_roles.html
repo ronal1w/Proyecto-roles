@@ -175,7 +175,7 @@ limpiarFormulario();
 // Función para guardar un nuevo rol
 function guardarRol(name) {
 
-    .then(() => {axios.post('http://localhost/proyecto-roles/backend/roles/create.php', { token: sessionStorage.getItem('token'), name })
+    then(() => {axios.post('http://localhost/proyecto-roles/backend/roles/create.php', { token: sessionStorage.getItem('token'), name })
         $('#modalCrearEditarRol').modal('hide');
         cargarRoles(); // Recargar la tabla para mostrar los cambios
     })
